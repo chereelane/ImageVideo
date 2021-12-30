@@ -8,7 +8,8 @@ video = cv2.VideoCapture(0)
 # Reads and prints frame
 while True:
     check, frame = video.read()
-
+    # indicates if there is motion in the frame; if there is no motion - status = 0; if there is motion - status = 1
+    status = 0
     # Converts color frame to gray
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # Blurs and updates the gray image
@@ -38,11 +39,12 @@ while True:
 
     # Press any button to close the window
     key = cv2.waitKey(1)
-    print(gray)
 
     # stops script if 'q' is pressed
     if key == ord('q'):
         break
+
+    print(status)
 
 # Release the camera/video
 video.release()
