@@ -1,9 +1,10 @@
-import cv2, time
+import cv2, time, pandas
 from datetime import datetime
 
 first_frame = None
 status_list = [None, None]
 times = []
+df = pandas.DataFrame(columns=["Start", "End"])
 
 # Create a video object
 video = cv2.VideoCapture(0)
@@ -26,16 +27,15 @@ while True:
     thresh_frame = cv2.threshold(delta_frame, 30, 255, cv2.THRESH_BINARY)[1]
     thresh_frame = cv2.dilate(thresh_frame, None, iterations=2)
 
-    (cnts, _) = cv2.findContours(thresh_frame.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    (cnt, _) = cv2.findContours(thresh_frame.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # Detects if contours are less than 10000; if so, the status changes to 1 detecting movement in the frame
-    for contour in cnts:
+    for contour in cnt:
         if cv2.contourArea(contour) < 10000:
             continue
         status = 1
-
         (x, y, w, h) = cv2.boundingRect(contour)
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
     status_list.append(status)
 
     # Records the time that the status changes from 0 to 1
@@ -63,6 +63,11 @@ while True:
 print(status_list)
 print(times)
 
+
+for i in range(0, len(times), 2):
+    df = df.append({"Start": times[i], "End": times[i + 1]}, ignore_index=True)
+
+df.to_csv("Times.csv")
 # Release the camera/video
 video.release()
 # Destroys all open windows.
