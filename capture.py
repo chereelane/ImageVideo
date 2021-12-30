@@ -1,6 +1,9 @@
-import cv2
+import cv2, time
+from datetime import datetime
 
 first_frame = None
+status_list = [None, None]
+times = []
 
 # Create a video object
 video = cv2.VideoCapture(0)
@@ -13,7 +16,7 @@ while True:
     # Converts color frame to gray
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # Blurs and updates the gray image
-    gray = cv2.GaussianBlur(gray, (31, 31), 0)
+    gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
     if first_frame is None:
         first_frame = gray
@@ -25,11 +28,22 @@ while True:
 
     (cnts, _) = cv2.findContours(thresh_frame.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    # Detects if contours are less than 10000; if so, the status changes to 1 detecting movement in the frame
     for contour in cnts:
-        if cv2.contourArea(contour) < 1000:
+        if cv2.contourArea(contour) < 10000:
             continue
+        status = 1
+
         (x, y, w, h) = cv2.boundingRect(contour)
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 3)
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
+    status_list.append(status)
+
+    # Records the time that the status changes from 0 to 1
+    if status_list[-1] == 1 and status_list[-2] == 0:
+        times.append(datetime.now())
+    # Records the time that the status changes from 1 to 0
+    if status_list[-1] == 0 and status_list[-2] == 1:
+        times.append(datetime.now())
 
     # Show the gray scale images
     cv2.imshow("Gray Frame", gray)
@@ -42,9 +56,12 @@ while True:
 
     # stops script if 'q' is pressed
     if key == ord('q'):
+        if status == 1:
+            times.append(datetime.now())
         break
 
-    print(status)
+print(status_list)
+print(times)
 
 # Release the camera/video
 video.release()
