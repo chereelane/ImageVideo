@@ -63,8 +63,13 @@ while True:
 print(status_list)
 print(times)
 
+end = None
+if len(times) % 2!= 0:
+    end = len(times) -1
+else:
+    end = len(times)
 
-for i in range(0, len(times), 2):
+for i in range(0, end, 2):
     df = df.append({"Start": times[i], "End": times[i + 1]}, ignore_index=True)
 
 df.to_csv("Times.csv")
