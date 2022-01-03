@@ -31,7 +31,7 @@ while True:
 
     # Detects if contours are less than 10000; if so, the status changes to 1 detecting movement in the frame
     for contour in cnt:
-        if cv2.contourArea(contour) < 10000:
+        if cv2.contourArea(contour) > 10000:
             continue
         status = 1
         (x, y, w, h) = cv2.boundingRect(contour)
